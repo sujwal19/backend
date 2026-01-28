@@ -1,0 +1,17 @@
+// create a small server
+import { getTasks } from "./tasks.js";
+import http from "http";
+const PORT = 8000;
+
+const server = http.createServer((req, res) => {
+  //   res.setHeader("Content-Type", "text/html");
+  //   res.statusCode = 404;
+
+  res.writeHead(200, { "content-type": "application/json" });
+  res.end(JSON.stringify(getTasks()));
+  //   res.end("<h1>Hello World</h1>");
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -1,0 +1,67 @@
+import { createServer } from "http";
+const PORT = process.env.PORT;
+
+const users = [
+  {
+    id: 1,
+    title:
+      "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+  },
+  {
+    id: 2,
+    title: "qui est esse",
+  },
+  {
+    id: 3,
+    title: "ea molestias quasi exercitationem repellat qui ipsa sit aut",
+  },
+  {
+    id: 4,
+    title: "eum et est occaecati",
+  },
+  {
+    id: 5,
+    title: "nesciunt quas odio",
+  },
+  {
+    id: 6,
+    title: "dolorem eum magni eos aperiam quia",
+  },
+  {
+    id: 7,
+    title: "magnam facilis autem",
+  },
+  {
+    id: 8,
+    title: "dolorem dolore est ipsam",
+  },
+  {
+    id: 9,
+    title: "nesciunt iure omnis dolorem tempora et accusantium",
+  },
+  {
+    id: 10,
+    title: "optio molestias id quia eum",
+  },
+  {
+    id: 11,
+    title: "et ea vero quia laudantium autem",
+  },
+];
+
+const server = createServer((req, res) => {
+  if (req.url === "/api/users" && req.method === "GET") {
+    res.setHeader("content-type", "application/json");
+    res.write(JSON.stringify(users));
+    res.end();
+  } else {
+    res.setHeader("content-type", "application/json");
+    res.statusCode = 404;
+    res.write(JSON.stringify({ message: "Route not Found" }));
+    res.end();
+  }
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -1,0 +1,4 @@
+/nodejs-crash/node_modules
+/nodejs-crash/.env
+**/node_modules/
+**/.env

@@ -1,0 +1,14 @@
+{
+  "name": "mongodb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "Sujwal",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "mongodb": "^7.1.0"
+  }
+}

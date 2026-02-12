@@ -1,67 +1,31 @@
 import express from "express";
+import todosRouter from "./routes/todos.js";
+import { globalErrorHandler } from "./errors/globalErrorHandler.js";
+import { notFoundHandler } from "./errors/notFoundHandler.js";
 
 const app = express();
-
 app.use(express.json());
 
+// Logger middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
-// store todos in memory
-let todos = [];
+
+// Use route
+app.use("/todos", todosRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.get("/todos", (req, res) => {
-  res.json(todos);
-});
+// Catch-all 404 handler (should be after all routes)
+app.use(notFoundHandler);
 
-app.post("/todos", (req, res) => {
-  const { title } = req.body;
-  if (!title) return res.status(400).json({ error: "Title is required" });
+// Global Error Handler (should be last)
+app.use(globalErrorHandler);
 
-  const newTask = {
-    id: todos.length ? todos[todos.length - 1].id + 1 : 1,
-    title,
-    completed: false,
-  };
-
-  todos.push(newTask);
-  res.status(201).json(newTask);
-});
-
-app.get("/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === parseInt(req.params.id));
-  if (!todo) {
-    return res.status(200).json({ error: "Todo not found" });
-  }
-  res.json(todo);
-});
-
-app.put("/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === parseInt(req.params.id));
-  if (!todo) {
-    return res.status(200).json({ error: "Todo not found" });
-  }
-  const { title } = req.body;
-  if (title !== undefined) todo.title = title;
-  res.status(200).json(todo);
-});
-
-app.delete("/todos/:id", (req, res) => {
-  const index = todos.findIndex((t) => t.id === parseInt(req.params.id));
-  const id = parseInt(req.params.id);
-
-  if (index === -1) return res.status(200).json({ error: "Todo not found" });
-
-  todos = todos.filter((todo) => todo.id !== id);
-  res.status(200).json(todos);
-});
-
-const PORT = 3000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

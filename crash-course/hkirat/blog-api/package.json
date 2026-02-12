@@ -1,14 +1,13 @@
 {
-  "name": "todo-app",
+  "name": "blog-api",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon --env-file=.env server"
+    "start": "nodemon --env-file=.env server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Sujwal",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "express": "^5.2.1",

@@ -1,10 +1,13 @@
 import express from "express";
+import { connectDB } from "./db.js";
 import postsRouter from "./routes/posts.js";
 import { globalErrorHandler } from "./errors/globalErrorHandler.js";
 import { notFoundHandler } from "./errors/notFoundHandler.js";
 
 const app = express();
 app.use(express.json());
+
+await connectDB();
 
 // Logger Middleware
 app.use("/", (req, res, next) => {

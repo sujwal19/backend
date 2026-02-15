@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const { protect, restrictTo } = require("../middleware/authMiddleware");
 
 const Workspace = require("../models/Workspace");
 
+router.use(protect);
+
 // Create a workspace
-router.post("/", async (req, res) => {
+// only admin can access specific route
+router.post("/", restrictTo("admin"), async (req, res) => {
   try {
     const ws = await Workspace.create(req.body);
     res.status(200).json(ws);

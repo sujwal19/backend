@@ -13,6 +13,19 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
+// Get tasks assigned to logged-in user
+router.get("/", protect, async (req, res) => {
+  try {
+    const tasks = await Task.find({ assignedTo: req.user._id }).populate(
+      "assignedTo project",
+      "name email title",
+    );
+    res.json({ tasks });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // Get tasks for a project
 router.get("/project/:projectId", protect, async (req, res) => {
   try {

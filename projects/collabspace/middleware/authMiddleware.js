@@ -7,7 +7,7 @@ exports.protect = async (req, res, next) => {
 
   // Check if request has Authorization header with Bearer <token>.
   if (!authHeader || !authHeader.startsWith("Bearer "))
-    return res.status(401).json({ error: "No token providede" });
+    return res.status(401).json({ error: "No token provided" });
 
   const token = authHeader.split(" ")[1];
 

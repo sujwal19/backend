@@ -1,6 +1,8 @@
 const User = require("../models/User");
+const sendEmail = require("../utils/email");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 // Signup
 exports.signup = async (req, res) => {
@@ -8,23 +10,38 @@ exports.signup = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser)
       return res.status(400).json({ error: "User already exists" });
 
     // Hash their password using bcrypt
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Save user in the database
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+    // Save user with verification token and isVerified
     const user = await User.create({
       name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
-      role,
+      role: role || "member",
+      isVerified: false,
+      verificationToken,
     });
 
+    // Send verification email
+    const verificationUrl = `${process.env.API_URL}/api/auth/verify/${verificationToken}`;
+
+    await sendEmail(
+      user.email,
+      "Verify Your Email",
+      `<p>Click <a href="${verificationUrl}">here</a> to verify your account</p>`,
+    );
+    console.log("Verification token:", verificationToken);
+
     // Return a success message
-    res.status(201).json({ message: "User created", user });
+    res.status(201).json({ message: "User created" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -36,12 +53,17 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) return res.status(400).json({ error: "User not found" });
 
     // If email not found, return error
-    if (!user) return res.status(400).json({ error: "Invalid credentials" });
-
-    // Compare entered password with hashed bassword using bcrypt
+    if (!user.isVerified) {
+      return res
+        .status(400)
+        .json({ error: "Please verify your email before logging in." });
+    }
+    // Compare entered password with hashed password using bcrypt
     const match = await bcrypt.compare(password, user.password);
 
     // If not match, return error

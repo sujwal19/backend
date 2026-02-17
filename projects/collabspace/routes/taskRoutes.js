@@ -6,6 +6,17 @@ const { protect, restrictTo } = require("../middleware/authMiddleware");
 // Create task - only project members
 router.post("/", protect, async (req, res) => {
   try {
+    const { project: projectId } = req.body;
+    const project = await require("../models/Project").findById(projectId);
+
+    if (!project) return res.status(400).json({ error: "Project not found" });
+
+    if (!project.members.includes(req.user._id) && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "You are not a member of this project" });
+    }
+
     const task = await Task.create(req.body);
     res.status(201).json(task);
   } catch (err) {
@@ -26,9 +37,22 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-// Get tasks for a project
+// Get tasks for a project - only project members
 router.get("/project/:projectId", protect, async (req, res) => {
   try {
+    const project = await require("../models/Project").findById(
+      req.params.projectId,
+    );
+
+    if (!project) return res.status(404).json({ error: "Project not found" });
+
+    // Only members or admin
+    if (!project.members.includes(req.user._id) && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "You are not a member of this project" });
+    }
+
     const tasks = await Task.find({ project: req.params.projectId }).populate(
       "assignedTo",
       "name email",
@@ -39,14 +63,18 @@ router.get("/project/:projectId", protect, async (req, res) => {
   }
 });
 
-// Update task status - only assigned user
+// Update task status - only assigned user or admin
 router.put("/:taskId", protect, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
     if (!task) return res.status(404).json({ error: "Task not found" });
 
-    if (task.assignedTo.toString() !== req.user._id.toString())
+    if (
+      task.assignedTo.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({ error: "Not allowed" });
+    }
 
     task.status = req.body.status || task.status;
     await task.save();

@@ -1,37 +1,26 @@
-import { useState } from "react";
-import WorkspaceList from "../components/Workspace/WorkspaceList";
-import WorkspaceDetail from "../components/Workspace/WorkspaceDetail";
-import ProjectView from "./ProjectView";
+import React, { useEffect, useState } from "react";
+import { getWorkspaces } from "../api/api";
+import WorkspaceCard from "../components/WorkspaceCard";
 
-export default function Dashboard() {
-  // Track which workspace is selected
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
-  // Track which project is selected
-  const [selectedProject, setSelectedProject] = useState(null);
+const Dashboard = () => {
+  const [workspaces, setWorkspaces] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await getWorkspaces();
+      setWorkspaces(res.data);
+    };
+    fetchData();
+  }, []);
 
   return (
     <div>
-      <h1>Dashboard</h1>
-
-      {/* Step 1: Show WorkspaceList if no workspace selected */}
-      {!selectedWorkspace && (
-        <WorkspaceList
-          onSelectWorkspace={(workspaceId) => {
-            setSelectedWorkspace(workspaceId);
-          }}
-        />
-      )}
-
-      {/* Step 2: Show WorkspaceDetail if a workspace is selected */}
-      {selectedWorkspace && !selectedProject && (
-        <WorkspaceDetail
-          workspaceId={selectedWorkspace}
-          onSelectProject={(projectId) => setSelectedProject(projectId)}
-        />
-      )}
-
-      {/* Step 3: Show ProjectView if a project is selected */}
-      {selectedProject && <ProjectView projectId={selectedProject} />}
+      <h2>Workspaces</h2>
+      {workspaces.map((ws) => (
+        <WorkspaceCard key={ws._id} workspace={ws} />
+      ))}
     </div>
   );
-}
+};
+
+export default Dashboard;

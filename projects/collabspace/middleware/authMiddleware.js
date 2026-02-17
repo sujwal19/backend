@@ -1,34 +1,17 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Protect routes
-exports.protect = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  // Check if request has Authorization header with Bearer <token>.
-  if (!authHeader || !authHeader.startsWith("Bearer "))
-    return res.status(401).json({ error: "No token provided" });
-
-  const token = authHeader.split(" ")[1];
-
+const authMiddleware = async (req, res, next) => {
   try {
-    // Verify the token with JWT_SECRET
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
 
-    // Attach user info to req.user
-    req.user = await User.findById(decoded.id).select("-password");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id);
     next();
   } catch (err) {
-    res.status(401).json({ error: "Token invalid" });
+    res.status(401).json({ message: "Unauthorized" });
   }
 };
 
-// Restrict to roles
-exports.restrictTo = (...roles) => {
-  return (req, res, next) => {
-    // Only allow users with certain roles.
-    if (!roles.includes(req.user.role))
-      return res.status(403).json({ error: "You do not have permission" });
-    next();
-  };
-};
+module.exports = authMiddleware;

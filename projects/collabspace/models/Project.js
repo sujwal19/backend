@@ -3,8 +3,11 @@ const mongoose = require("mongoose");
 const projectSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    description: String,
-    workspace: { type: mongoose.Schema.Types.ObjectId, ref: "Workspace" },
+    workspace: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Workspace",
+      required: true,
+    },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true },

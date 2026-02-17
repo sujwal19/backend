@@ -1,22 +1,19 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
+const authMiddleware = require("../middleware/authMiddleware");
+const authorize = require("../middleware/roleMiddleware");
+const {
+  getAllUsers,
+  getUserById,
+  updateUser,
+} = require("../controllers/userController");
 
-const User = require("../models/User");
+// Only admin can list all users
+router.get("/", authMiddleware, authorize(["admin"]), getAllUsers);
 
-// Create user
-router.post("/", async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+// Get profile by ID (self or admin)
+router.get("/:id", authMiddleware, getUserById);
 
-// Get all users
-router.get("/", async (req, res) => {
-  const users = await User.find().limit(10).skip(0);
-  res.json(users);
-});
+// Update user info (self or admin)
+router.put("/:id", authMiddleware, updateUser);
 
 module.exports = router;

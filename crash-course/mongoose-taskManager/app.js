@@ -1,130 +1,116 @@
+import express from "express";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+import { Task } from "./models/Task.js";
+import { User } from "./models/user.js";
+import jwt from "jsonwebtoken";
 
+dotenv.config();
+const app = express();
+app.use(express.json()); // parse JSON body
+
+// Connect MongoDB
 mongoose
-  .connect("mongodb://127.0.0.1:27017/blogAdvanced")
-  .then(() => console.log("✅ Connected to MongoDB"))
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.log(err));
 
-const userSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
-    age: { type: Number, min: 0 },
-    isActive: { type: Boolean, default: true },
-  },
-  { timestamps: true },
-);
-
-// Instance Method
-userSchema.methods.greet = function () {
-  return `Hi, my name is ${this.name}`;
-};
-
-// Static Method
-userSchema.statics.findActive = function () {
-  return this.find({ isActive: true });
-};
-
-// Virtual
-userSchema.virtual("nameEmail").get(function () {
-  return `${this.name} <${this.email}>`;
-});
-
-// Index
-userSchema.index({ email: 1 });
-
-const User = mongoose.model("User", userSchema);
-
-const postSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    content: { type: String },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    tags: {
-      type: [String],
-      validate: {
-        validator: (arr) => arr.length <= 5,
-        message: "Max 5 tags allowed",
-      },
-    },
-    comments: [
-      {
-        text: String,
-        commenter: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      },
-    ],
-  },
-  { timestamps: true },
-);
-
-// Pre Save Hook
-postSchema.pre("save", function (next) {
-  console.log("About to save this post:", this.title);
-});
-
-// Post Save Hook
-postSchema.post("save", function (doc) {
-  console.log("Saved post:", doc.title);
-});
-
-const Post = mongoose.model("Post", postSchema);
-
-async function run() {
+// Register
+app.post("/register", async (req, res) => {
   try {
-    // Create Users
-    const alice = await User.create({
-      name: "Alice",
-      email: "alice@example.com",
-      age: 25,
-    });
-    const bob = await User.create({
-      name: "Bob",
-      email: "bob@example.com",
-      age: 29,
-    });
-
-    //
-    console.log(alice.greet()); // Methods
-    const activeUsers = await User.findActive(); // Statics
-    console.log(
-      "Active Users:",
-      activeUsers.map((u) => u.nameEmail),
-    ); // Virtuals
-
-    // Create Post
-    const post = await Post.create({
-      title: "My First Post",
-      content: "Hello World",
-      author: alice._id,
-      tags: ["intro", "hello"],
-    });
-    //
-
-    const populatedPost = await Post.findById(post._id)
-      .populate("author", "name email")
-      .lean();
-    console.log("Populated Post:", populatedPost);
-
-    // Update Post
-    await Post.findByIdAndDelete(
-      post._id,
-      { $push: { tags: "updated" } },
-      { runValidators: true },
-    );
-
-    // Delete Post
-    await Post.deleteOne({ _id: post._id });
-    console.log("Deleted post");
-    //
+    const user = await User.create(req.body);
+    res.status(201).json({ message: "User created", userId: user._id });
   } catch (err) {
-    console.error(err);
-  } finally {
-    mongoose.connection.close();
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Login
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+  const token = jwt.sign({ userId: user._id }, "supersecretkey", {
+    expiresIn: "1d",
+  });
+
+  res.json({ token });
+});
+
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "No token provided" });
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, "supersecretkey");
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
   }
 }
 
-run();
+// Get all tasks
+app.get("/tasks", authMiddleware, async (req, res) => {
+  try {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create new task
+app.post("/tasks", authMiddleware, async (req, res) => {
+  try {
+    const task = await Task.create(req.body);
+    res.status(201).json(task);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Get single task
+app.get("/tasks/:id", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json(task);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid Task ID" });
+  }
+});
+
+// Update task
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json(task);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete task
+app.delete("/tasks/:id", async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json({ message: "Task deleted", task });
+  } catch (err) {
+    res.status(400).json({ error: "Invalid Task ID" });
+  }
+});
+
+// Start server
+app.listen(3000, () => console.log("🚀 Server running on port 3000"));

@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const connectDB = require("./models/db");
 const authRoutes = require("./routes/authRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 connectDB();
 
@@ -17,6 +18,7 @@ app.use("/ping", (req, res) => {
 app.use(bodyParser.json());
 app.use(cors());
 app.use("/auth", authRoutes);
+app.use("/products", productRoutes);
 
 const PORT = process.env.PORT || 8080;
 

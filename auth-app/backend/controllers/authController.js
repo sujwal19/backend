@@ -17,12 +17,12 @@ const signup = async (req, res) => {
     const userModal = new User({ name, email, password });
     userModal.password = await bcrypt.hash(password, 10);
     await userModal.save();
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Signup Successfully",
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
@@ -56,7 +56,7 @@ const login = async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login Successfully",
       email: user.email,
@@ -64,7 +64,7 @@ const login = async (req, res) => {
       jwtToken,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });

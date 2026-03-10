@@ -24,5 +24,3 @@ const ensureAuthenticated = (req, res, next) => {
 };
 
 module.exports = ensureAuthenticated;
-
-console.log(process.env.JWT_SECRET);

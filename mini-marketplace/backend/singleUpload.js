@@ -7,8 +7,7 @@ const router = express.Router();
 router.post("/local", uploadFile, async (req, res) => {
   try {
     const file = req.file;
-
-    await SingleLocal({
+    await SingleLocal.create({
       image: file?.path,
     });
 
@@ -17,7 +16,7 @@ router.post("/local", uploadFile, async (req, res) => {
       message: "Pic Uploaded",
     });
   } catch (err) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: err.message,
     });

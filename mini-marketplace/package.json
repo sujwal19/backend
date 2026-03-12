@@ -11,11 +11,14 @@
     "server": "nodemon backend/index.js"
   },
   "dependencies": {
+    "cloudinary": "^2.9.0",
     "colors": "^1.4.0",
+    "datauri": "^4.1.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "mongoose": "^9.3.0",
-    "multer": "^2.1.1"
+    "multer": "^2.1.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

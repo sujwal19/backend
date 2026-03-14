@@ -5,14 +5,15 @@ import { useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const LocalSingle = () => {
+const CloudSingle = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
   const [file, setFile] = useState("");
+
   async function fetchAllImages() {
     try {
-      const { data } = await axios.get(`${server}/api/single/local/all`);
+      const { data } = await axios.get(`${server}/api/single/cloud/all`);
       setData(data);
     } catch (err) {
       console.log(err);
@@ -37,7 +38,7 @@ const LocalSingle = () => {
     formData.append("file", file);
 
     try {
-      const { data } = await axios.post(`${server}/api/single/local`, formData);
+      const { data } = await axios.post(`${server}/api/single/cloud`, formData);
 
       toast.success(data.message);
       fetchAllImages();
@@ -65,7 +66,7 @@ const LocalSingle = () => {
               return (
                 <img
                   key={idx}
-                  src={`${server}/${e.image}`}
+                  src={e.image.url}
                   style={{ width: "200px", height: "300px" }}
                   alt=""
                 />
@@ -77,4 +78,4 @@ const LocalSingle = () => {
   );
 };
 
-export default LocalSingle;
+export default CloudSingle;

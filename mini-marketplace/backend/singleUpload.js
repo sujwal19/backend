@@ -53,12 +53,12 @@ router.post("/cloud", uploadFileCloud, async (req, res) => {
   }
 });
 
-router.post("/local/all", async (req, res) => {
+router.get("/local/all", async (req, res) => {
   const images = await SingleLocal.find();
   res.json(images);
 });
 
-router.post("/cloud/all", async (req, res) => {
+router.get("/cloud/all", async (req, res) => {
   const images = await SingleCloud.find();
   res.json(images);
 });

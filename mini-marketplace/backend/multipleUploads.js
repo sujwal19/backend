@@ -61,12 +61,12 @@ router.post("/cloud", uploadMultipleCloud, async (req, res) => {
   }
 });
 
-router.post("/local/all", async (req, res) => {
+router.get("/local/all", async (req, res) => {
   const images = await MultipleLocal.find();
   res.json(images);
 });
 
-router.post("/cloud/all", async (req, res) => {
+router.get("/cloud/all", async (req, res) => {
   const images = await MultipleCloud.find();
   res.json(images);
 });

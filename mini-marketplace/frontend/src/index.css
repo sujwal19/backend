@@ -30,3 +30,24 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
+.allImages {
+  width: 90%;
+  margin: auto;
+
+  .container {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
+.upload {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}

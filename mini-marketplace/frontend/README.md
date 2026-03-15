@@ -1,16 +1,54 @@
-# React + Vite
+# Image Upload App (MERN)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple MERN stack project that demonstrates how to upload and display images using:
 
-Currently, two official plugins are available:
+- Local storage
+- Cloud storage (Cloudinary)
+- Single image upload
+- Multiple image upload
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Upload a **single image to local storage**
+- Upload **multiple images to local storage**
+- Upload a **single image to Cloudinary**
+- Upload **multiple images to Cloudinary**
+- View all uploaded images
+- Toast notifications for success and errors
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+Frontend:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- React Router
+- Axios
+- React Hot Toast
+
+Backend:
+
+- Node.js
+- Express.js
+- MongoDB
+- Multer
+- Cloudinary
+
+## Project Routes
+
+### Local Storage
+
+- `/local/single` → Upload single image to local server
+- `/local/multiple` → Upload multiple images to local server
+
+### Cloud Storage
+
+- `/cloud/single` → Upload single image to Cloudinary
+- `/cloud/multiple` → Upload multiple images to Cloudinary
+
+## Author
+
+Sujwal Dhungana
+
+## License
+
+This project is open source and free to use.
